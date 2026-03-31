@@ -117,7 +117,9 @@ Handled in `middleware/errorHandler.js`, registered as the last middleware in `s
 
 ## Time
 
-The AI did not track wall-clock time. All 9 files were written in a single uninterrupted sequence of tool calls with no user intervention between writes. No iteration or correction was needed.
+For prompt #1 (project code): 1m 7s
+
+For prompt #2 (documentation README.md): 1m 32s
 
 ---
 
