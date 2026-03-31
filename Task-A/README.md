@@ -11,9 +11,19 @@
 
 ---
 
-## Prompt Given
+## Prompts Given
 
+Prompt #1:
 > Initialise a Node.js project with Express and MongoDB using Mongoose. Set up the project structure with separate folders for routes, models, controllers, and middleware. Add a basic server.js that connects to MongoDB and starts the Express server on port 3000. Include a .env file for configuration.
+
+Prompt #2:
+> Review everything you did in this session — all files created, folders, packages installed, commands run, and the project structure. Create a README.md that documents: the prompt I gave you, what you generated, the full file/folder structure, all packages used, the time it took, and any manual steps needed. Format it as a development log, not a user guide.
+
+Prompt #3:
+> Add JWT-based authentication to the project. Create a User model with email and password fields, add password hashing with bcrypt on registration. Create auth routes for POST /api/auth/register and POST /api/auth/login that return a JWT token. Add an auth middleware that protects routes by verifying the Bearer token. Update the existing user routes to be protected. Add jsonwebtoken and bcryptjs as dependencies.
+
+Prompt #4:
+>  
 
 ---
 
@@ -121,6 +131,7 @@ For prompt #1 (project code): 1m 7s
 
 For prompt #2 (documentation README.md): 1m 32s
 
+For prompt #3 (additional features): 40s
 ---
 
 ## Manual Steps Required
