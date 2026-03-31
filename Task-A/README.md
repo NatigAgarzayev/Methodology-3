@@ -23,7 +23,15 @@ Prompt #3:
 > Add JWT-based authentication to the project. Create a User model with email and password fields, add password hashing with bcrypt on registration. Create auth routes for POST /api/auth/register and POST /api/auth/login that return a JWT token. Add an auth middleware that protects routes by verifying the Bearer token. Update the existing user routes to be protected. Add jsonwebtoken and bcryptjs as dependencies.
 
 Prompt #4:
->  
+> Add a Blog Post feature. Create a Post model with title, content, author (reference to User), tags (array of strings), and timestamps. Create a post controller and routes at /api/posts with full CRUD — create, get all, get by id, update, and delete. Only authenticated users can create, update, or delete posts. A user can only update or delete their own posts. The get all endpoint should support filtering by tag via query parameter. Populate the author field with the user's name and email when returning posts.
+
+
+Prompt #5:
+> Add a Comment feature. Create a Comment model with content, author (reference to User), post (reference to Post), and timestamps. Create comment routes nested under posts at /api/posts/:postId/comments. Only authenticated users can create and delete comments. A user can only delete their own comments. Populate the author field with name and email when returning comments.
+
+
+Prompt #6:
+> The README.md already has all 5 prompts listed. Now update the rest of the file to reflect the current state of the project. Update: the Files Created table to include all new files from prompts 3-5 (auth controller, auth routes, auth middleware, Post model, post controller, post routes, Comment model, comment controller, comment routes). Update the Full Project Structure tree. Update the Packages Declared table to include jsonwebtoken and bcryptjs. Update the API Surface table to include all auth, post, and comment endpoints. Remove the Notes section that says "No authentication" since authentication now exists. Keep the same format.
 
 ---
 
@@ -33,17 +41,26 @@ All files were created by the AI directly using file-write tools. No shell comma
 
 ### Files Created (in order)
 
-| # | File | Purpose |
-|---|------|---------|
-| 1 | `package.json` | Project manifest, scripts, dependency declarations |
-| 2 | `.env` | Local environment config (gitignored) |
-| 3 | `.env.example` | Committed template for `.env` |
-| 4 | `.gitignore` | Excludes `node_modules/` and `.env` |
-| 5 | `server.js` | Entry point — connects to MongoDB, starts Express on port 3000 |
-| 6 | `models/User.js` | Mongoose schema with `name`, `email`, `timestamps` |
-| 7 | `controllers/userController.js` | CRUD handlers: getAllUsers, getUserById, createUser, updateUser, deleteUser |
-| 8 | `routes/userRoutes.js` | REST routes for `/api/users` mapped to controller |
-| 9 | `middleware/errorHandler.js` | Centralised error handler covering validation, duplicate key, and generic errors |
+| # | File | Prompt | Purpose |
+|---|------|--------|---------|
+| 1 | `package.json` | #1 | Project manifest, scripts, dependency declarations |
+| 2 | `.env` | #1 | Local environment config (gitignored) |
+| 3 | `.env.example` | #1 | Committed template for `.env` |
+| 4 | `.gitignore` | #1 | Excludes `node_modules/` and `.env` |
+| 5 | `server.js` | #1 | Entry point — connects to MongoDB, starts Express on port 3000 |
+| 6 | `models/User.js` | #1 | Mongoose schema with `name`, `email`, `password`, `timestamps` |
+| 7 | `controllers/userController.js` | #1 | CRUD handlers: getAllUsers, getUserById, createUser, updateUser, deleteUser |
+| 8 | `routes/userRoutes.js` | #1 | REST routes for `/api/users`; all routes protected |
+| 9 | `middleware/errorHandler.js` | #1 | Centralised error handler covering validation, duplicate key, and generic errors |
+| 10 | `middleware/auth.js` | #3 | JWT Bearer token verification; attaches `req.user` |
+| 11 | `controllers/authController.js` | #3 | `register` (bcrypt hash via pre-save hook) and `login` (compare + sign token) |
+| 12 | `routes/authRoutes.js` | #3 | Maps POST `/register` and POST `/login` |
+| 13 | `models/Post.js` | #4 | Mongoose schema with `title`, `content`, `author` (ref), `tags`, `timestamps` |
+| 14 | `controllers/postController.js` | #4 | Full CRUD with ownership checks on update/delete |
+| 15 | `routes/postRoutes.js` | #4 | REST routes for `/api/posts`; GET public, write ops protected |
+| 16 | `models/Comment.js` | #5 | Mongoose schema with `content`, `author` (ref), `post` (ref), `timestamps` |
+| 17 | `controllers/commentController.js` | #5 | getComments, createComment, deleteComment with ownership check |
+| 18 | `routes/commentRoutes.js` | #5 | Nested routes under `/:postId/comments`; uses `mergeParams: true` |
 
 ### Folders Created (implicitly)
 
@@ -62,12 +79,21 @@ Task-A/
 ```
 Task-A/
 ├── controllers/
+│   ├── authController.js
+│   ├── commentController.js
+│   ├── postController.js
 │   └── userController.js
 ├── middleware/
+│   ├── auth.js
 │   └── errorHandler.js
 ├── models/
+│   ├── Comment.js
+│   ├── Post.js
 │   └── User.js
 ├── routes/
+│   ├── authRoutes.js
+│   ├── commentRoutes.js
+│   ├── postRoutes.js
 │   └── userRoutes.js
 ├── .env
 ├── .env.example
@@ -83,11 +109,13 @@ Task-A/
 
 ### dependencies
 
-| Package   | Version  | Role                              |
-|-----------|----------|-----------------------------------|
-| `express` | ^4.19.2  | HTTP server and routing framework |
-| `mongoose`| ^8.4.0   | MongoDB ODM                       |
-| `dotenv`  | ^16.4.5  | Loads `.env` into `process.env`   |
+| Package          | Version  | Role                              |
+|------------------|----------|-----------------------------------|
+| `bcryptjs`       | ^2.4.3   | Password hashing and comparison   |
+| `dotenv`         | ^16.4.5  | Loads `.env` into `process.env`   |
+| `express`        | ^4.19.2  | HTTP server and routing framework |
+| `jsonwebtoken`   | ^9.0.2   | JWT signing and verification      |
+| `mongoose`       | ^8.4.0   | MongoDB ODM                       |
 
 ### devDependencies
 
@@ -101,15 +129,42 @@ Task-A/
 
 ## API Surface
 
-Base path: `http://localhost:3000/api/users`
+Base URL: `http://localhost:3000`
 
-| Method | Path           | Controller fn   | Description       |
-|--------|----------------|-----------------|-------------------|
-| GET    | `/`            | getAllUsers      | Return all users  |
-| GET    | `/:id`         | getUserById     | Return one user   |
-| POST   | `/`            | createUser      | Create a user     |
-| PUT    | `/:id`         | updateUser      | Replace a user    |
-| DELETE | `/:id`         | deleteUser      | Delete a user     |
+### Auth — `/api/auth`
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/api/auth/register` | — | Create account, returns JWT |
+| POST | `/api/auth/login` | — | Validate credentials, returns JWT |
+
+### Users — `/api/users`
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/users` | Bearer token | Return all users |
+| GET | `/api/users/:id` | Bearer token | Return one user |
+| POST | `/api/users` | Bearer token | Create a user |
+| PUT | `/api/users/:id` | Bearer token | Replace a user |
+| DELETE | `/api/users/:id` | Bearer token | Delete a user |
+
+### Posts — `/api/posts`
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/posts` | — | Return all posts; optional `?tag=` filter |
+| GET | `/api/posts/:id` | — | Return one post with populated author |
+| POST | `/api/posts` | Bearer token | Create a post |
+| PUT | `/api/posts/:id` | Bearer token | Update own post (403 if not author) |
+| DELETE | `/api/posts/:id` | Bearer token | Delete own post (403 if not author) |
+
+### Comments — `/api/posts/:postId/comments`
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/posts/:postId/comments` | — | Return all comments on a post |
+| POST | `/api/posts/:postId/comments` | Bearer token | Create a comment on a post |
+| DELETE | `/api/posts/:postId/comments/:commentId` | Bearer token | Delete own comment (403 if not author) |
 
 ---
 
@@ -132,6 +187,12 @@ For prompt #1 (project code): 1m 7s
 For prompt #2 (documentation README.md): 1m 32s
 
 For prompt #3 (additional features): 40s
+
+For prompt #4 (additional features): 36s
+
+For prompt #5 (additional features): 38s
+
+For prompt #6 (documentation README.md update): 1m 18s
 ---
 
 ## Manual Steps Required
@@ -170,5 +231,4 @@ npm start       # production (node)
 ## Notes
 
 - `node_modules/` and `.env` are gitignored. Use `.env.example` as the reference when sharing the project.
-- The `User` model is a minimal placeholder. Extend `models/User.js` with additional fields as needed.
-- No authentication, no request validation middleware, and no test suite were included — the prompt did not ask for them.
+- Set `JWT_SECRET` in `.env` to a long random string before any production use.
