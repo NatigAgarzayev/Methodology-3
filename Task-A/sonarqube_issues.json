@@ -1,1 +1,225 @@
-{"total":4,"p":1,"ps":500,"paging":{"pageIndex":1,"pageSize":500,"total":4},"effortTotal":100,"issues":[{"key":"cb6bc66a-7ae3-4559-a87b-7ad6b98ed7e9","rule":"secrets:S6702","severity":"BLOCKER","component":"task-a:sonar-project.properties","project":"task-a","line":6,"hash":"08bd0dc71776f467e0306c61008e77bc","textRange":{"startLine":6,"endLine":6,"startOffset":12,"endOffset":56},"flows":[],"status":"OPEN","message":"Make sure this SonarQube token gets revoked, changed, and removed from the code.","effort":"30min","debt":"30min","author":"","tags":["cwe"],"creationDate":"2026-04-01T07:40:23+0000","updateDate":"2026-04-01T07:40:23+0000","type":"VULNERABILITY","scope":"MAIN","quickFixAvailable":false,"messageFormattings":[],"codeVariants":[],"cleanCodeAttribute":"TRUSTWORTHY","cleanCodeAttributeCategory":"RESPONSIBLE","impacts":[{"softwareQuality":"SECURITY","severity":"BLOCKER"}],"issueStatus":"OPEN","prioritizedRule":false,"fromSonarQubeUpdate":false,"internalTags":[],"linkedTicketStatus":"NOT_LINKED"},{"key":"8171dbd0-078e-4b4f-98ef-d82e8f16881b","rule":"javascript:S6582","severity":"MAJOR","component":"task-a:middleware/auth.js","project":"task-a","line":7,"hash":"b95d92c73e979619da523a9373e89e4e","textRange":{"startLine":7,"endLine":7,"startOffset":6,"endOffset":54},"flows":[],"status":"OPEN","message":"Prefer using an optional chain expression instead, as it\u0027s more concise and easier to read.","effort":"5min","debt":"5min","author":"natigagharzayev@gmail.com","tags":[],"creationDate":"2026-03-31T11:06:51+0000","updateDate":"2026-04-01T07:40:23+0000","type":"CODE_SMELL","scope":"MAIN","quickFixAvailable":true,"messageFormattings":[],"codeVariants":[],"cleanCodeAttribute":"CLEAR","cleanCodeAttributeCategory":"INTENTIONAL","impacts":[{"softwareQuality":"MAINTAINABILITY","severity":"MEDIUM"}],"issueStatus":"OPEN","prioritizedRule":false,"fromSonarQubeUpdate":false,"internalTags":[],"linkedTicketStatus":"NOT_LINKED"},{"key":"dffea168-6bae-43f8-8e4e-47f2788bee20","rule":"javascript:S2486","severity":"MINOR","component":"task-a:middleware/auth.js","project":"task-a","line":18,"hash":"9dcd66fc3d98a347c205c43e822e7ebd","textRange":{"startLine":18,"endLine":20,"startOffset":4,"endOffset":3},"flows":[],"status":"OPEN","message":"Handle this exception or don\u0027t catch it at all.","effort":"1h","debt":"1h","author":"natigagharzayev@gmail.com","tags":["cwe","error-handling","suspicious"],"creationDate":"2026-03-31T11:06:51+0000","updateDate":"2026-04-01T07:40:23+0000","type":"CODE_SMELL","scope":"MAIN","quickFixAvailable":false,"messageFormattings":[],"codeVariants":[],"cleanCodeAttribute":"CLEAR","cleanCodeAttributeCategory":"INTENTIONAL","impacts":[{"softwareQuality":"MAINTAINABILITY","severity":"LOW"}],"issueStatus":"OPEN","prioritizedRule":false,"fromSonarQubeUpdate":false,"internalTags":[],"linkedTicketStatus":"NOT_LINKED"},{"key":"985373cf-9fde-422b-b566-574c7028400d","rule":"javascript:S7785","severity":"MAJOR","component":"task-a:server.js","project":"task-a","line":31,"hash":"e60d4e3b9cabc66dd76ebe5a8f6bdc9f","textRange":{"startLine":31,"endLine":31,"startOffset":3,"endOffset":8},"flows":[],"status":"OPEN","message":"Prefer top-level await over using a promise chain.","effort":"5min","debt":"5min","author":"natigagharzayev@gmail.com","tags":["async","es2022","modernize"],"creationDate":"2026-03-31T10:29:25+0000","updateDate":"2026-04-01T07:40:23+0000","type":"CODE_SMELL","scope":"MAIN","quickFixAvailable":false,"messageFormattings":[],"codeVariants":[],"cleanCodeAttribute":"CONVENTIONAL","cleanCodeAttributeCategory":"CONSISTENT","impacts":[{"softwareQuality":"MAINTAINABILITY","severity":"MEDIUM"}],"issueStatus":"OPEN","prioritizedRule":false,"fromSonarQubeUpdate":false,"internalTags":[],"linkedTicketStatus":"NOT_LINKED"}],"components":[{"key":"task-a:server.js","enabled":true,"qualifier":"FIL","name":"server.js","longName":"server.js","path":"server.js"},{"key":"task-a","enabled":true,"qualifier":"TRK","name":"Task A - Blog API","longName":"Task A - Blog API"},{"key":"task-a:middleware/auth.js","enabled":true,"qualifier":"FIL","name":"auth.js","longName":"middleware/auth.js","path":"middleware/auth.js"},{"key":"task-a:sonar-project.properties","enabled":true,"qualifier":"FIL","name":"sonar-project.properties","longName":"sonar-project.properties","path":"sonar-project.properties"}],"facets":[]}
+{
+    "total": 4,
+    "p": 1,
+    "ps": 500,
+    "paging": {
+        "pageIndex": 1,
+        "pageSize": 500,
+        "total": 4
+    },
+    "effortTotal": 100,
+    "issues": [
+        {
+            "key": "cb6bc66a-7ae3-4559-a87b-7ad6b98ed7e9",
+            "rule": "secrets:S6702",
+            "severity": "BLOCKER",
+            "component": "task-a:sonar-project.properties",
+            "project": "task-a",
+            "line": 6,
+            "hash": "08bd0dc71776f467e0306c61008e77bc",
+            "textRange": {
+                "startLine": 6,
+                "endLine": 6,
+                "startOffset": 12,
+                "endOffset": 56
+            },
+            "flows": [],
+            "status": "OPEN",
+            "message": "Make sure this SonarQube token gets revoked, changed, and removed from the code.",
+            "effort": "30min",
+            "debt": "30min",
+            "author": "",
+            "tags": [
+                "cwe"
+            ],
+            "creationDate": "2026-04-01T07:40:23+0000",
+            "updateDate": "2026-04-01T07:40:23+0000",
+            "type": "VULNERABILITY",
+            "scope": "MAIN",
+            "quickFixAvailable": false,
+            "messageFormattings": [],
+            "codeVariants": [],
+            "cleanCodeAttribute": "TRUSTWORTHY",
+            "cleanCodeAttributeCategory": "RESPONSIBLE",
+            "impacts": [
+                {
+                    "softwareQuality": "SECURITY",
+                    "severity": "BLOCKER"
+                }
+            ],
+            "issueStatus": "OPEN",
+            "prioritizedRule": false,
+            "fromSonarQubeUpdate": false,
+            "internalTags": [],
+            "linkedTicketStatus": "NOT_LINKED"
+        },
+        {
+            "key": "8171dbd0-078e-4b4f-98ef-d82e8f16881b",
+            "rule": "javascript:S6582",
+            "severity": "MAJOR",
+            "component": "task-a:middleware/auth.js",
+            "project": "task-a",
+            "line": 7,
+            "hash": "b95d92c73e979619da523a9373e89e4e",
+            "textRange": {
+                "startLine": 7,
+                "endLine": 7,
+                "startOffset": 6,
+                "endOffset": 54
+            },
+            "flows": [],
+            "status": "OPEN",
+            "message": "Prefer using an optional chain expression instead, as it\u0027s more concise and easier to read.",
+            "effort": "5min",
+            "debt": "5min",
+            "author": "natigagharzayev@gmail.com",
+            "tags": [],
+            "creationDate": "2026-03-31T11:06:51+0000",
+            "updateDate": "2026-04-01T07:40:23+0000",
+            "type": "CODE_SMELL",
+            "scope": "MAIN",
+            "quickFixAvailable": true,
+            "messageFormattings": [],
+            "codeVariants": [],
+            "cleanCodeAttribute": "CLEAR",
+            "cleanCodeAttributeCategory": "INTENTIONAL",
+            "impacts": [
+                {
+                    "softwareQuality": "MAINTAINABILITY",
+                    "severity": "MEDIUM"
+                }
+            ],
+            "issueStatus": "OPEN",
+            "prioritizedRule": false,
+            "fromSonarQubeUpdate": false,
+            "internalTags": [],
+            "linkedTicketStatus": "NOT_LINKED"
+        },
+        {
+            "key": "dffea168-6bae-43f8-8e4e-47f2788bee20",
+            "rule": "javascript:S2486",
+            "severity": "MINOR",
+            "component": "task-a:middleware/auth.js",
+            "project": "task-a",
+            "line": 18,
+            "hash": "9dcd66fc3d98a347c205c43e822e7ebd",
+            "textRange": {
+                "startLine": 18,
+                "endLine": 20,
+                "startOffset": 4,
+                "endOffset": 3
+            },
+            "flows": [],
+            "status": "OPEN",
+            "message": "Handle this exception or don\u0027t catch it at all.",
+            "effort": "1h",
+            "debt": "1h",
+            "author": "natigagharzayev@gmail.com",
+            "tags": [
+                "cwe",
+                "error-handling",
+                "suspicious"
+            ],
+            "creationDate": "2026-03-31T11:06:51+0000",
+            "updateDate": "2026-04-01T07:40:23+0000",
+            "type": "CODE_SMELL",
+            "scope": "MAIN",
+            "quickFixAvailable": false,
+            "messageFormattings": [],
+            "codeVariants": [],
+            "cleanCodeAttribute": "CLEAR",
+            "cleanCodeAttributeCategory": "INTENTIONAL",
+            "impacts": [
+                {
+                    "softwareQuality": "MAINTAINABILITY",
+                    "severity": "LOW"
+                }
+            ],
+            "issueStatus": "OPEN",
+            "prioritizedRule": false,
+            "fromSonarQubeUpdate": false,
+            "internalTags": [],
+            "linkedTicketStatus": "NOT_LINKED"
+        },
+        {
+            "key": "985373cf-9fde-422b-b566-574c7028400d",
+            "rule": "javascript:S7785",
+            "severity": "MAJOR",
+            "component": "task-a:server.js",
+            "project": "task-a",
+            "line": 31,
+            "hash": "e60d4e3b9cabc66dd76ebe5a8f6bdc9f",
+            "textRange": {
+                "startLine": 31,
+                "endLine": 31,
+                "startOffset": 3,
+                "endOffset": 8
+            },
+            "flows": [],
+            "status": "OPEN",
+            "message": "Prefer top-level await over using a promise chain.",
+            "effort": "5min",
+            "debt": "5min",
+            "author": "natigagharzayev@gmail.com",
+            "tags": [
+                "async",
+                "es2022",
+                "modernize"
+            ],
+            "creationDate": "2026-03-31T10:29:25+0000",
+            "updateDate": "2026-04-01T07:40:23+0000",
+            "type": "CODE_SMELL",
+            "scope": "MAIN",
+            "quickFixAvailable": false,
+            "messageFormattings": [],
+            "codeVariants": [],
+            "cleanCodeAttribute": "CONVENTIONAL",
+            "cleanCodeAttributeCategory": "CONSISTENT",
+            "impacts": [
+                {
+                    "softwareQuality": "MAINTAINABILITY",
+                    "severity": "MEDIUM"
+                }
+            ],
+            "issueStatus": "OPEN",
+            "prioritizedRule": false,
+            "fromSonarQubeUpdate": false,
+            "internalTags": [],
+            "linkedTicketStatus": "NOT_LINKED"
+        }
+    ],
+    "components": [
+        {
+            "key": "task-a:server.js",
+            "enabled": true,
+            "qualifier": "FIL",
+            "name": "server.js",
+            "longName": "server.js",
+            "path": "server.js"
+        },
+        {
+            "key": "task-a",
+            "enabled": true,
+            "qualifier": "TRK",
+            "name": "Task A - Blog API",
+            "longName": "Task A - Blog API"
+        },
+        {
+            "key": "task-a:middleware/auth.js",
+            "enabled": true,
+            "qualifier": "FIL",
+            "name": "auth.js",
+            "longName": "middleware/auth.js",
+            "path": "middleware/auth.js"
+        },
+        {
+            "key": "task-a:sonar-project.properties",
+            "enabled": true,
+            "qualifier": "FIL",
+            "name": "sonar-project.properties",
+            "longName": "sonar-project.properties",
+            "path": "sonar-project.properties"
+        }
+    ],
+    "facets": []
+}

@@ -289,7 +289,20 @@ docker stop sonarqube && docker rm sonarqube   # remove completely
 
 ### Semgrep (Security Vulnerabilities)
 
-*To be added.*
+**Install (if not already):**
+```bash
+pip install semgrep
+```
+
+**Run via CLI:**
+```bash
+semgrep scan --json --output semgrep_task_a.json
+```
+
+**Run via Docker:**
+```bash
+docker run --rm -v "${PWD}:/src" semgrep/semgrep semgrep scan --json --output /src/semgrep_task_a.json /src
+```
 
 ### Snyk (Dependency Vulnerabilities)
 
