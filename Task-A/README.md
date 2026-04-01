@@ -100,6 +100,7 @@ Task-A/
 ├── .gitignore
 ├── package.json
 ├── README.md
+├── sonar-project.properties
 └── server.js
 ```
 
@@ -182,17 +183,16 @@ Handled in `middleware/errorHandler.js`, registered as the last middleware in `s
 
 ## Time
 
-For prompt #1 (project code): 1m 7s
+| Prompt | Feature | Time |
+|--------|---------|------|
+| #1 | Project setup (Express, MongoDB, MVC structure) | 1m 7s |
+| #2 | README documentation | 1m 32s |
+| #3 | JWT authentication | 40s |
+| #4 | Blog posts CRUD with tags | 36s |
+| #5 | Comments on posts | 38s |
+| #6 | README update | 1m 18s |
+| **Total** | | **6m 11s** |
 
-For prompt #2 (documentation README.md): 1m 32s
-
-For prompt #3 (additional features): 40s
-
-For prompt #4 (additional features): 36s
-
-For prompt #5 (additional features): 38s
-
-For prompt #6 (documentation README.md update): 1m 18s
 ---
 
 ## Manual Steps Required
@@ -225,6 +225,75 @@ Change `MONGODB_URI` if needed:
 npm run dev     # development (nodemon)
 npm start       # production (node)
 ```
+
+---
+
+## Code Quality Analysis
+
+### SonarQube (Code Quality, Code Smells, Bugs, Security)
+
+**Start SonarQube via Docker:**
+```bash
+docker run -d --name sonarqube -p 9000:9000 sonarqube:community
+```
+
+Wait 1-2 minutes for SonarQube to fully start, then open `http://localhost:9000`.
+
+**First-time login:**
+- Username: `admin`
+- Password: `admin`
+- You will be asked to change the password on first login
+
+**Create a project:**
+1. Click "Create a local project"
+2. Project key: `task-a`
+3. Display name: `Task A - Blog API`
+4. Click "Set Up"
+5. Choose "Locally"
+6. Generate a token and copy it
+
+**Create `sonar-project.properties` in the project root:**
+```properties
+sonar.projectKey=task-a
+sonar.projectName=Task A - Blog API
+sonar.sources=.
+sonar.exclusions=node_modules/**
+sonar.host.url=http://localhost:9000
+sonar.token=YOUR_TOKEN_HERE
+```
+
+**Run:**
+```bash
+npm install -g sonarqube-scanner
+sonar-scanner
+```
+
+**View results:** Open `http://localhost:9000` and click on the `task-a` project.
+
+**Export results:**
+```bash
+curl -u admin:YOUR_PASSWORD "http://localhost:9000/api/measures/component?component=task-a&metricKeys=bugs,vulnerabilities,code_smells,duplicated_lines_density,coverage,ncloc,reliability_rating,security_rating,sqale_rating" -o sonarqube_metrics.json
+curl -u admin:YOUR_PASSWORD "http://localhost:9000/api/issues/search?componentKeys=task-a&ps=500" -o sonarqube_issues.json
+```
+
+**Stop / Restart SonarQube:**
+```bash
+docker stop sonarqube    # stop
+docker start sonarqube   # restart
+docker stop sonarqube && docker rm sonarqube   # remove completely
+```
+
+### ESLint (Code Style, Best Practices)
+
+*To be added.*
+
+### Semgrep (Security Vulnerabilities)
+
+*To be added.*
+
+### Snyk (Dependency Vulnerabilities)
+
+*To be added.*
 
 ---
 
