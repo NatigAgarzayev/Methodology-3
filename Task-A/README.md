@@ -285,7 +285,29 @@ docker stop sonarqube && docker rm sonarqube   # remove completely
 
 ### ESLint (Code Style, Best Practices)
 
-*To be added.*
+**Install:**
+```bash
+npm install eslint --save-dev
+npx eslint --init
+```
+
+**Configuration:** Choose "To check syntax and find problems", CommonJS, no framework, no TypeScript, Node. Then add Node globals to `eslint.config.mjs`:
+```js
+import globals from "globals";
+
+export default [
+  {
+    languageOptions: {
+      globals: globals.node
+    }
+  }
+];
+```
+
+**Run:**
+```bash
+npx eslint . --format json -o eslint_results.json
+```
 
 ### Semgrep (Security Vulnerabilities)
 
