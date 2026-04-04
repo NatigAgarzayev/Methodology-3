@@ -25,20 +25,10 @@ const buildFindAllQuery = (query: any, id: number | undefined) => {
   }
 
   if (query.search) {
-    queries.push({ // I changed it from anyQueries to queries since anyQueries doesn't exist in this scope
+    queries.push({
       OR: [
-        {
-          title: {
-            contains: query.search,
-            mode: 'insensitive',
-          },
-        },
-        {
-          body: {
-            contains: query.search,
-            mode: 'insensitive',
-          },
-        },
+        { title: { contains: query.search, mode: 'insensitive' } },
+        { body: { contains: query.search, mode: 'insensitive' } },
       ],
     });
   }
