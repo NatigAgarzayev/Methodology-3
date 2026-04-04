@@ -2,14 +2,17 @@ import { NextFunction, Request, Response, Router } from 'express';
 import auth from '../auth/auth';
 import {
   addComment,
+  bookmarkArticle,
   createArticle,
   deleteArticle,
   deleteComment,
   favoriteArticle,
   getArticle,
   getArticles,
+  getBookmarkedArticles,
   getCommentsByArticle,
   getFeed,
+  unbookmarkArticle,
   unfavoriteArticle,
   updateArticle,
 } from './article.service';
@@ -76,6 +79,62 @@ router.post('/articles', auth.required, async (req: Request, res: Response, next
     next(error);
   }
 });
+
+// ✅ Register BEFORE any /:slug wildcard routes
+router.get(
+  '/articles/bookmarks',
+  auth.required,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const limit = Number(req.query.limit) || 20;
+      const offset = Number(req.query.offset) || 0;
+
+      const result = await getBookmarkedArticles(
+        req.auth!.user!.id,
+        limit,
+        offset,
+      );
+
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Mirrors POST /articles/:slug/favorite exactly
+router.post(
+  '/articles/:slug/bookmark',
+  auth.required,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const article = await bookmarkArticle(
+        req.params.slug,
+        req.auth!.user!.id,
+      );
+      res.json({ article });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Mirrors DELETE /articles/:slug/favorite exactly
+router.delete(
+  '/articles/:slug/bookmark',
+  auth.required,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const article = await unbookmarkArticle(
+        req.params.slug,
+        req.auth!.user!.id,
+      );
+      res.json({ article });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 /**
  * Get unique article

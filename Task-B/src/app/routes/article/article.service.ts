@@ -4,6 +4,20 @@ import HttpException from '../../models/http-exception.model';
 import profileMapper from '../profile/profile.utils';
 import articleMapper from './article.mapper';
 import { Tag } from '../tag/tag.model';
+import { Article, User } from '@prisma/client';
+
+/**
+ * The shaped article returned to the client — matches whatever your existing
+ * formatArticle() / toArticleResponse() helper produces. Adjust as needed.
+ */
+type ArticleWithMeta = Article & {
+  author: Pick<User, 'username' | 'image' | 'bio'>;
+  tagList: { name: string }[];
+  _count: { favoritedBy: number };
+  isBookmarked: boolean;
+  isFavorited: boolean;
+};
+
 
 const buildFindAllQuery = (query: any, id: number | undefined) => {
   const queries: any = [];
@@ -335,9 +349,9 @@ export const updateArticle = async (article: any, slug: string, id: number) => {
   const tagList =
     Array.isArray(article.tagList) && article.tagList?.length
       ? article.tagList.map((tag: string) => ({
-          create: { name: tag },
-          where: { name: tag },
-        }))
+        create: { name: tag },
+        where: { name: tag },
+      }))
       : [];
 
   await disconnectArticlesTags(slug);
@@ -650,3 +664,220 @@ export const unfavoriteArticle = async (slugPayload: string, id: number) => {
 
   return result;
 };
+
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetches a single article by slug, throwing a descriptive error if missing.
+ * Reuse this across bookmark and favorite services to stay DRY.
+ */
+async function findArticleBySlug(slug: string): Promise<Article> {
+  const article = await prisma.article.findUnique({ where: { slug } });
+  if (!article) {
+    throw Object.assign(new Error('Article not found'), { status: 404 });
+  }
+  return article;
+}
+
+/**
+ * Shapes a raw Prisma article record into the API response object.
+ * Mirrors your existing article serialisation logic — adapt field names
+ * to match whatever your current formatArticle() helper returns.
+ */
+function formatArticle(
+  article: ArticleWithMeta,
+  currentUserId?: number,
+): object {
+  return {
+    slug: article.slug,
+    title: article.title,
+    description: article.description,
+    body: article.body,
+    tagList: article.tagList.map((t) => t.name),
+    createdAt: article.createdAt,
+    updatedAt: article.updatedAt,
+    favorited: article.isFavorited,
+    favoritesCount: article._count.favoritedBy,
+    bookmarked: article.isBookmarked,     // ← new field exposed to clients
+    author: {
+      username: article.author.username,
+      image: article.author.image,
+      bio: article.author.bio,
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Service: bookmarkArticle
+// ---------------------------------------------------------------------------
+
+/**
+ * Adds the article to the authenticated user's bookmarks.
+ * Idempotent — bookmarking an already-bookmarked article is a no-op.
+ *
+ * @param slug         - The article's unique slug
+ * @param currentUserId - The ID of the requesting user (from JWT payload)
+ * @returns The formatted article, with `bookmarked: true`
+ */
+export async function bookmarkArticle(
+  slug: string,
+  currentUserId: number,
+): Promise<object> {
+  const article = await findArticleBySlug(slug);
+
+  const updatedUser = await prisma.user.update({
+    where: { id: currentUserId },
+    data: {
+      bookmarks: {
+        connect: { id: article.id },
+      },
+    },
+    select: {
+      bookmarks: { select: { id: true } },
+    },
+  });
+
+  // Fetch the full shaped article after the mutation
+  return getFormattedArticle(article.id, currentUserId);
+}
+
+// ---------------------------------------------------------------------------
+// Service: unbookmarkArticle
+// ---------------------------------------------------------------------------
+
+/**
+ * Removes the article from the authenticated user's bookmarks.
+ * Idempotent — unbookmarking an article that was never bookmarked is a no-op.
+ *
+ * @param slug          - The article's unique slug
+ * @param currentUserId - The ID of the requesting user (from JWT payload)
+ * @returns The formatted article, with `bookmarked: false`
+ */
+export async function unbookmarkArticle(
+  slug: string,
+  currentUserId: number,
+): Promise<object> {
+  const article = await findArticleBySlug(slug);
+
+  await prisma.user.update({
+    where: { id: currentUserId },
+    data: {
+      bookmarks: {
+        disconnect: { id: article.id },
+      },
+    },
+  });
+
+  return getFormattedArticle(article.id, currentUserId);
+}
+
+// ---------------------------------------------------------------------------
+// Service: getBookmarkedArticles
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns a paginated list of articles bookmarked by the authenticated user,
+ * ordered by most-recently-created first.
+ *
+ * @param currentUserId - The ID of the requesting user
+ * @param limit         - Page size (default 20, matches your existing feed API)
+ * @param offset        - Pagination offset (default 0)
+ * @returns `{ articles, articlesCount }` matching your existing list shape
+ */
+export async function getBookmarkedArticles(
+  currentUserId: number,
+  limit = 20,
+  offset = 0,
+): Promise<{ articles: object[]; articlesCount: number }> {
+  // Run the count and data fetch in parallel — same pattern as your article feed
+  const [articlesCount, user] = await Promise.all([
+    prisma.article.count({
+      where: {
+        bookmarkedBy: { some: { id: currentUserId } },
+      },
+    }),
+    prisma.user.findUnique({
+      where: { id: currentUserId },
+      select: {
+        bookmarks: {
+          orderBy: { createdAt: 'desc' },
+          skip: offset,
+          take: limit,
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            description: true,
+            body: true,
+            createdAt: true,
+            updatedAt: true,
+            authorId: true,
+            tagList: { select: { name: true } },
+            author: { select: { username: true, image: true, bio: true } },
+            _count: { select: { favoritedBy: true } },
+            favoritedBy: { where: { id: currentUserId }, select: { id: true } },
+            bookmarkedBy: { where: { id: currentUserId }, select: { id: true } },
+          },
+        },
+      },
+    }),
+  ]);
+
+  if (!user) {
+    throw Object.assign(new Error('User not found'), { status: 404 });
+  }
+
+  const articles = user.bookmarks.map((a) =>
+    formatArticle(
+      {
+        ...a,
+        // Resolve the boolean flags from the filtered sub-arrays
+        isFavorited: a.favoritedBy.length > 0,
+        isBookmarked: a.bookmarkedBy.length > 0, // always true here, but consistent
+      } as ArticleWithMeta,
+      currentUserId,
+    ),
+  );
+
+  return { articles, articlesCount };
+}
+
+// ---------------------------------------------------------------------------
+// Internal helper: fetch + format a single article by ID
+// ---------------------------------------------------------------------------
+
+async function getFormattedArticle(
+  articleId: number,
+  currentUserId: number,
+): Promise<object> {
+  const article = await prisma.article.findUniqueOrThrow({
+    where: { id: articleId },
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      description: true,
+      body: true,
+      createdAt: true,
+      updatedAt: true,
+      authorId: true,
+      tagList: { select: { name: true } },
+      author: { select: { username: true, image: true, bio: true } },
+      _count: { select: { favoritedBy: true } },
+      favoritedBy: { where: { id: currentUserId }, select: { id: true } },
+      bookmarkedBy: { where: { id: currentUserId }, select: { id: true } },
+    },
+  });
+
+  return formatArticle(
+    {
+      ...article,
+      isFavorited: article.favoritedBy.length > 0,
+      isBookmarked: article.bookmarkedBy.length > 0,
+    } as ArticleWithMeta,
+    currentUserId,
+  );
+}
