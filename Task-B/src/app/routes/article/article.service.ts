@@ -6,7 +6,7 @@ import articleMapper from './article.mapper';
 import { Tag } from '../tag/tag.model';
 
 const buildFindAllQuery = (query: any, id: number | undefined) => {
-  const queries: any = [];
+  const andQueries: any[] = [];
   const orAuthorQuery = [];
   const andAuthorQuery = [];
 
@@ -21,6 +21,26 @@ const buildFindAllQuery = (query: any, id: number | undefined) => {
       id: {
         equals: id,
       },
+    });
+  }
+
+  if (query.search) {
+    const searchTerm = query.search;
+    andQueries.push({
+      OR: [
+        {
+          title: {
+            contains: searchTerm,
+            mode: 'insensitive'
+          }
+        },
+        {
+          body: {
+            contains: searchTerm,
+            mode: 'insensitive'
+          }
+        }
+      ]
     });
   }
 
@@ -39,10 +59,10 @@ const buildFindAllQuery = (query: any, id: number | undefined) => {
     },
   };
 
-  queries.push(authorQuery);
+  andQueries.push(authorQuery);
 
   if ('tag' in query) {
-    queries.push({
+    andQueries.push({
       tagList: {
         some: {
           name: query.tag,
@@ -52,7 +72,7 @@ const buildFindAllQuery = (query: any, id: number | undefined) => {
   }
 
   if ('favorited' in query) {
-    queries.push({
+    andQueries.push({
       favoritedBy: {
         some: {
           username: {
@@ -63,7 +83,7 @@ const buildFindAllQuery = (query: any, id: number | undefined) => {
     });
   }
 
-  return queries;
+  return andQueries;
 };
 
 export const getArticles = async (query: any, id?: number) => {
@@ -335,9 +355,9 @@ export const updateArticle = async (article: any, slug: string, id: number) => {
   const tagList =
     Array.isArray(article.tagList) && article.tagList?.length
       ? article.tagList.map((tag: string) => ({
-          create: { name: tag },
-          where: { name: tag },
-        }))
+        create: { name: tag },
+        where: { name: tag },
+      }))
       : [];
 
   await disconnectArticlesTags(slug);
