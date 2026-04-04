@@ -4,6 +4,7 @@ import HttpException from '../../models/http-exception.model';
 import profileMapper from '../profile/profile.utils';
 import articleMapper from './article.mapper';
 import { Tag } from '../tag/tag.model';
+import { Article, User } from '@prisma/client';
 
 const buildFindAllQuery = (query: any, id: number | undefined) => {
   const queries: any = [];
@@ -81,6 +82,7 @@ export const getArticles = async (query: any, id?: number) => {
     },
     skip: Number(query.offset) || 0,
     take: Number(query.limit) || 10,
+    // In getArticles function, update include clause:
     include: {
       tagList: {
         select: {
@@ -95,10 +97,20 @@ export const getArticles = async (query: any, id?: number) => {
           followedBy: true,
         },
       },
-      favoritedBy: true,
+      favoritedBy: {
+        select: {
+          id: true,
+        },
+      },
+      bookmarkedBy: {  // NEW
+        select: {
+          id: true,
+        },
+      },
       _count: {
         select: {
           favoritedBy: true,
+          bookmarkedBy: true,  // NEW
         },
       },
     },
@@ -258,9 +270,15 @@ export const getArticle = async (slug: string, id?: number) => {
         },
       },
       favoritedBy: true,
+      bookmarkedBy: {  // NEW
+        select: {
+          id: true,
+        },
+      },
       _count: {
         select: {
           favoritedBy: true,
+          bookmarkedBy: true,  // NEW
         },
       },
     },
@@ -335,9 +353,9 @@ export const updateArticle = async (article: any, slug: string, id: number) => {
   const tagList =
     Array.isArray(article.tagList) && article.tagList?.length
       ? article.tagList.map((tag: string) => ({
-          create: { name: tag },
-          where: { name: tag },
-        }))
+        create: { name: tag },
+        where: { name: tag },
+      }))
       : [];
 
   await disconnectArticlesTags(slug);
