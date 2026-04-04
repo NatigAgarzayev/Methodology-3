@@ -24,6 +24,25 @@ const buildFindAllQuery = (query: any, id: number | undefined) => {
     });
   }
 
+  if (query.search) {
+    queries.push({ // I changed it from anyQueries to queries since anyQueries doesn't exist in this scope
+      OR: [
+        {
+          title: {
+            contains: query.search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          body: {
+            contains: query.search,
+            mode: 'insensitive',
+          },
+        },
+      ],
+    });
+  }
+
   if ('author' in query) {
     andAuthorQuery.push({
       username: {
@@ -335,9 +354,9 @@ export const updateArticle = async (article: any, slug: string, id: number) => {
   const tagList =
     Array.isArray(article.tagList) && article.tagList?.length
       ? article.tagList.map((tag: string) => ({
-          create: { name: tag },
-          where: { name: tag },
-        }))
+        create: { name: tag },
+        where: { name: tag },
+      }))
       : [];
 
   await disconnectArticlesTags(slug);
