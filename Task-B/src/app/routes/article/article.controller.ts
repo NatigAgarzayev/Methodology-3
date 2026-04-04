@@ -2,14 +2,17 @@ import { NextFunction, Request, Response, Router } from 'express';
 import auth from '../auth/auth';
 import {
   addComment,
+  bookmarkArticle,
   createArticle,
   deleteArticle,
   deleteComment,
   favoriteArticle,
   getArticle,
   getArticles,
+  getBookmarkedArticles,
   getCommentsByArticle,
   getFeed,
+  unbookmarkArticle,
   unfavoriteArticle,
   updateArticle,
 } from './article.service';
@@ -77,25 +80,6 @@ router.post('/articles', auth.required, async (req: Request, res: Response, next
   }
 });
 
-/**
- * Get unique article
- * @auth optional
- * @route {GET} /article/:slug
- * @param slug slug of the article (based on the title)
- * @returns article
- */
-router.get(
-  '/articles/:slug',
-  auth.optional,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const article = await getArticle(req.params.slug, req.auth?.user?.id);
-      res.json({ article });
-    } catch (error) {
-      next(error);
-    }
-  },
-);
 
 /**
  * Update article
@@ -114,25 +98,6 @@ router.put(
     try {
       const article = await updateArticle(req.body.article, req.params.slug, req.auth?.user?.id);
       res.json({ article });
-    } catch (error) {
-      next(error);
-    }
-  },
-);
-
-/**
- * Delete article
- * @auth required
- * @route {DELETE} /article/:id
- * @param slug slug of the article
- */
-router.delete(
-  '/articles/:slug',
-  auth.required,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      await deleteArticle(req.params.slug, req.auth?.user!.id);
-      res.sendStatus(204);
     } catch (error) {
       next(error);
     }
@@ -233,6 +198,64 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const article = await unfavoriteArticle(req.params.slug, req.auth?.user?.id);
+      res.json({ article });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.post(
+  '/articles/:slug/bookmark',
+  auth.required,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const article = await bookmarkArticle(req.params.slug, req.auth?.user?.id);
+      res.json({ article });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.delete(
+  '/articles/:slug/bookmark',
+  auth.required,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const article = await unbookmarkArticle(req.params.slug, req.auth?.user?.id);
+      res.json({ article });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get(
+  '/articles/bookmarks',
+  auth.required,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const articles = await getBookmarkedArticles(req.auth?.user?.id);
+      res.json({ articles });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+/**
+ * Get unique article
+ * @auth optional
+ * @route {GET} /article/:slug
+ * @param slug slug of the article (based on the title)
+ * @returns article
+ */
+router.get(
+  '/articles/:slug',
+  auth.optional,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const article = await getArticle(req.params.slug, req.auth?.user?.id);
       res.json({ article });
     } catch (error) {
       next(error);

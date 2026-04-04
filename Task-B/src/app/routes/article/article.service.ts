@@ -335,9 +335,9 @@ export const updateArticle = async (article: any, slug: string, id: number) => {
   const tagList =
     Array.isArray(article.tagList) && article.tagList?.length
       ? article.tagList.map((tag: string) => ({
-          create: { name: tag },
-          where: { name: tag },
-        }))
+        create: { name: tag },
+        where: { name: tag },
+      }))
       : [];
 
   await disconnectArticlesTags(slug);
@@ -650,3 +650,118 @@ export const unfavoriteArticle = async (slugPayload: string, id: number) => {
 
   return result;
 };
+
+
+function mapArticle(article: any, currentUserId?: number) {
+  return {
+    ...article,
+    favorited: currentUserId
+      ? article.favoritedBy?.some((user: { id: number }) => user.id === currentUserId)
+      : false,
+    favoritesCount: article.favoritedBy?.length ?? 0,
+    bookmarked: currentUserId
+      ? article.bookmarkedBy?.some((user: { id: number }) => user.id === currentUserId)
+      : false,
+  };
+}
+
+export async function bookmarkArticle(slug: string, userId?: number) {
+  if (!userId) {
+    throw new Error('Unauthorized');
+  }
+
+  await prisma.article.update({
+    where: { slug },
+    data: {
+      bookmarkedBy: {
+        connect: { id: userId },
+      },
+    },
+  });
+
+  const article = await prisma.article.findUnique({
+    where: { slug },
+    include: {
+      author: true,
+      tagList: true,
+      favoritedBy: {
+        select: { id: true },
+      },
+      bookmarkedBy: {
+        select: { id: true },
+      },
+    },
+  });
+
+  if (!article) {
+    throw new Error('Article not found');
+  }
+
+  return mapArticle(article, userId);
+}
+
+export async function unbookmarkArticle(slug: string, userId?: number) {
+  if (!userId) {
+    throw new Error('Unauthorized');
+  }
+
+  await prisma.article.update({
+    where: { slug },
+    data: {
+      bookmarkedBy: {
+        disconnect: { id: userId },
+      },
+    },
+  });
+
+  const article = await prisma.article.findUnique({
+    where: { slug },
+    include: {
+      author: true,
+      tagList: true,
+      favoritedBy: {
+        select: { id: true },
+      },
+      bookmarkedBy: {
+        select: { id: true },
+      },
+    },
+  });
+
+  if (!article) {
+    throw new Error('Article not found');
+  }
+
+  return mapArticle(article, userId);
+}
+
+export async function getBookmarkedArticles(userId?: number) {
+  if (!userId) {
+    throw new Error('Unauthorized');
+  }
+
+  const articles = await prisma.article.findMany({
+    where: {
+      bookmarkedBy: {
+        some: {
+          id: userId,
+        },
+      },
+    },
+    include: {
+      author: true,
+      tagList: true,
+      favoritedBy: {
+        select: { id: true },
+      },
+      bookmarkedBy: {
+        select: { id: true },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  return articles.map((article) => mapArticle(article, userId));
+}
