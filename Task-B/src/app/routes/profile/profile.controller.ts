@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import auth from '../auth/auth';
-import { followUser, getProfile, unfollowUser } from './profile.service';
+import { followUser, getProfile, getProfileStats, unfollowUser } from './profile.service';
 
 const router = Router();
 
@@ -63,5 +63,18 @@ router.delete(
     }
   },
 );
+
+router.get('/profiles/:username/stats', auth.optional, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const stats = await getProfileStats(
+      req.params.username,
+      req.auth?.user?.id
+    );
+    res.json(stats);
+  } catch (error) {
+    next(error);
+  }
+});
+
 
 export default router;
